@@ -30,13 +30,17 @@ for i in range(1, det_reader.n_frames()):
     frame = img_reader.get_frame()
     bbs, ct = det_reader.get_detection(frame=i + 1)
 
-    tracker.update(bbs, ct)
+    tracker.update(frame, bbs, ct)
     index_conf = tracker.check_confounders()
     # matching = tracker.lap_constrained()
-    print(tracker._id_dict)
+    # print(tracker._id_dict)
     tracker.update_id()
-    ids_to_print = tracker.get_present_ids()
+    print(len(tracker._img_array))
+    tracker.get_hoc()
+    print(tracker._id_hoc)
 
+
+    ids_to_print = tracker.get_present_ids()
     # preparing data to print results
     for j in range(len(ids_to_print)):
         temp = [i+1, ids_to_print[j]]
