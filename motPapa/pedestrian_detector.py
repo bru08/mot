@@ -22,12 +22,14 @@ COCO_INSTANCE_CATEGORY_NAMES = [
 
 class Object_Detector():
 
-    def __init__(self, config):
+    def __init__(self):
+        # by default use pytorch implementation
+        # of faster rcnn trained on COCO dataset
 
         self._img = None
         self._img_tens = None
-        self._choose_model = config["MODEL"]
-        self._cat_names = config["CLASS_NAMES"]
+        self._choose_model = "fasterrcnn_resnet50_fpn"
+        self._cat_names = COCO_INSTANCE_CATEGORY_NAMES
         self.trans = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 
         self._model_used = None
@@ -37,7 +39,8 @@ class Object_Detector():
         self._pred_class = None
         self._img_det = None
 
-        self._threshold = config["CONF_THRESHOLD"]
+        self._threshold = 0.6
+
         self._rect_thick = 2
         self._text_size = .5
         self._text_thick = 1
@@ -54,7 +57,7 @@ class Object_Detector():
         self._img_name = (img_path.split("/")[-1]).split(".")[0]
         self.get_detection_bb()  # perform detection of given image
         self.get_bb_centers()
-        # self.print_det_results() # draw results
+
 
     def set_model(self):
         command = "self._model" + "=torchvision.models.detection." + self._choose_model + "(pretrained=True)"

@@ -5,6 +5,9 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial import distance_matrix
 from scipy.spatial.distance import euclidean
+from .myUtil import get_bb_hw
+
+
 
 
 class TrackerByDetection:

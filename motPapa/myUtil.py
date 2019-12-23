@@ -9,10 +9,20 @@ import queue
 import copy
 import itertools
 
+
 def rect_list_center(rect_list):
     # give a list of rectangles and return a list of the center points
     res = [((x[0] + x[2]) / 2, (x[1] + x[3]) / 2) for x in rect_list]
     return res
+
+
+def get_bb_hw(box):
+    x = box[0]
+    y = box[1]
+    w = box[2] - box[0]
+    h = box[3] - box[1]
+    return x, y, w, h
+
 
 class DetectionFileReader:
     # TODO read in mot ch format, also have my detection in mot ch format
@@ -66,15 +76,6 @@ class ImageReader:
 
         self.proc_index += 1
         return img
-
-
-
-def get_bb_hw(box):
-    x = box[0]
-    y = box[1]
-    w = box[2] - box[0]
-    h = box[3] - box[1]
-    return x, y, w, h
 
 
 class StuffShower():
