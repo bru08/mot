@@ -91,6 +91,7 @@ class DetectionFileReader:
         return bbs, bb_ct  # return bb and centers!
 
 
+
 class ImageReader:
 
     def __init__(self, img_folder_path, loadFull):
@@ -125,8 +126,9 @@ class StuffShower():
         self._exit_keys = [ord("q"), ord("Q"), 27]  # upper and lowcase q and ESC key
         self._circle_radius = 2
         self._id_trajectories = {}
-        self._colors = [np.random.randint(0, 255, 3) for i in range(150)]
+        self._colors = [np.random.randint(0, 255, 3) for i in range(300)]
         self._colors = [[int(x[0]), int(x[1]), int(x[2])] for x in self._colors]
+        self._img_memory = []
 
     def show_detection(self, img, bbs):
 
@@ -205,7 +207,7 @@ class StuffShower():
                         (x_c, y_c - 10),
                         fontFace, fontScale,
                         (0, 0, 0), thickness)  # Write the prediction class
-
+        self._img_memory.append(copy.copy(show_clone))
         cv2.imshow("tracking", show_clone)
 
     def update_trajectories(self, id, ct):
@@ -222,3 +224,14 @@ class StuffShower():
             return False
         else:
             return True
+
+    def save_video(self, path):
+        h, w, lay = self._img_memory[0].shape
+
+        out = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"mp4v"), 10, (w, h))
+
+        for i in range(len(self._img_memory)):
+            out.write(self._img_memory[i])
+
+        out.release()
+

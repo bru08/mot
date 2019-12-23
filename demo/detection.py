@@ -53,7 +53,7 @@ if __name__ == "__main__":
     res = shared_dict["a"]
     res.extend(shared_dict["b"])
 
-    f = open("../Output/detections/detections.csv", "w", newline="")
+    f = open("../Output/detection/detections.csv", "w", newline="")
     writer = csv.writer(f)
     writer.writerows(res)
     f.close()
