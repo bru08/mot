@@ -127,4 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/data/
+/Output/video_tracking_papa.mp4
+/metrics/out_events.txt
+/data/img1/
+

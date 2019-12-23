@@ -15,6 +15,11 @@ def rect_list_center(rect_list):
     res = [((x[0] + x[2]) / 2, (x[1] + x[3]) / 2) for x in rect_list]
     return res
 
+def bb_list_center(rect_list):
+    # give a list of rectangles and return a list of the center points
+    res = [(x[0] + x[2] / 2, x[1] + x[3] / 2) for x in rect_list]
+    return res
+
 
 def get_bb_hw(box):
     x = box[0]
@@ -22,6 +27,13 @@ def get_bb_hw(box):
     w = box[2] - box[0]
     h = box[3] - box[1]
     return x, y, w, h
+
+def get_bb_pp(box):
+    x = box[0]
+    y = box[1]
+    x2 = box[2] + box[0]
+    y2 = box[3] + box[1]
+    return x, y, x2, y2
 
 
 def IoU_calc(boxA, boxB):
@@ -45,11 +57,18 @@ def IoU_calc(boxA, boxB):
 class DetectionFileReader:
     # TODO read in mot ch format, also have my detection in mot ch format
 
-    def __init__(self, path):
+    def __init__(self, path, gt = False):
         # import the dataframe with detections
         # acquire max frame number in the file
         self._df = pd.read_csv(path, header=None)
         self._df_last_time = self._df.iloc[-1, 0]
+        self._gt = gt
+
+        if self._gt:
+            # remove unnecessary columns from mot challenge format file
+            # only column 0 and 2,3,4,5 (frameID, box coordinates)
+            self._df = self._df.iloc[:, [0, 2, 3, 4, 5]]
+
 
     def n_frames(self):
         # return number of frames in the dataframe
@@ -64,8 +83,13 @@ class DetectionFileReader:
 
         # take just bb(bounding boxes) and ct(the centers
         bbs = temp.values.tolist()
-        bb_ct = rect_list_center(bbs)  # compute centers from list of bboxes
-        return bbs, bb_ct
+        if self._gt:
+            bb_ct = bb_list_center(bbs)
+        else:
+            bb_ct = rect_list_center(bbs)  # compute centers from list of bboxes
+
+        return bbs, bb_ct  # return bb and centers!
+
 
 
 class ImageReader:
@@ -102,8 +126,9 @@ class StuffShower():
         self._exit_keys = [ord("q"), ord("Q"), 27]  # upper and lowcase q and ESC key
         self._circle_radius = 2
         self._id_trajectories = {}
-        self._colors = [np.random.randint(0, 255, 3) for i in range(150)]
+        self._colors = [np.random.randint(0, 255, 3) for i in range(300)]
         self._colors = [[int(x[0]), int(x[1]), int(x[2])] for x in self._colors]
+        self._img_memory = []
 
     def show_detection(self, img, bbs):
 
@@ -182,7 +207,7 @@ class StuffShower():
                         (x_c, y_c - 10),
                         fontFace, fontScale,
                         (0, 0, 0), thickness)  # Write the prediction class
-
+        self._img_memory.append(copy.copy(show_clone))
         cv2.imshow("tracking", show_clone)
 
     def update_trajectories(self, id, ct):
@@ -199,3 +224,14 @@ class StuffShower():
             return False
         else:
             return True
+
+    def save_video(self, path):
+        h, w, lay = self._img_memory[0].shape
+
+        out = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"mp4v"), 10, (w, h))
+
+        for i in range(len(self._img_memory)):
+            out.write(self._img_memory[i])
+
+        out.release()
+
